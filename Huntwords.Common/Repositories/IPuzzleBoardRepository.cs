@@ -1,4 +1,5 @@
 ﻿#pragma warning disable CS1572, CS1573, CS1591
+using System;
 using System.Collections.Generic;
 using Huntwords.Common.Models;
 
@@ -9,6 +10,11 @@ namespace Huntwords.Common.Repositories
     /// </summary>
     public interface IPuzzleBoardRepository
     {
+        /// <summary>
+        /// Deletes a puzzle board list
+        /// </summary>
+        /// <param name="name">PuzzleBoard name</param>
+        void Delete(string name);
         /// <summary>
         /// Get the Length of the PuzzleBoard List for name
         /// </summary>
@@ -27,9 +33,14 @@ namespace Huntwords.Common.Repositories
         /// <param name="puzzleBoard">PuzzleBoard</param>
         void Push(PuzzleBoard puzzleBoard);
         /// <summary>
-        /// Deletes a puzzle board list
+        /// Publish a message that a PuzzleBoard has been popped out of the list
         /// </summary>
-        /// <param name="name">PuzzleBoard name</param>
-        void Delete(string name);        
+        /// <param name="puzzleName">Name of the PuzzleBoard list that was popped</param>
+        void PublishPopped(string puzzleName);
+        /// <summary>
+        /// Subscribe to PuzzleBoard popped messages
+        /// </summary>
+        /// <param name="puzzlePoppedHandler">Action&lt;string&gt; that will handle the message</param>
+        void SubscribePopped(Action<string> puzzlePoppedHandler);
     }
 }

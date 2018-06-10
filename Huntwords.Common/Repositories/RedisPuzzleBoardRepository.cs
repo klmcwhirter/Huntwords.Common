@@ -1,4 +1,5 @@
 ﻿#pragma warning disable CS1572, CS1573, CS1591
+using System;
 using System.Collections.Generic;
 using Huntwords.Common.Models;
 using Huntwords.Common.Services;
@@ -10,6 +11,7 @@ namespace Huntwords.Common.Repositories
     public class RedisPuzzleBoardRepository : IPuzzleBoardRepository
     {
         protected string PuzzleBoardListName = "urn:puzzleboards";
+        protected string PuzzleBoardPoppedChannel = "urn:puzzleboard:popped";
 
         protected IRedisClient RedisClient { get; }
         protected ITransformer<string, PuzzleBoard> Json2PuzzleBoardTransformer { get; }
@@ -45,13 +47,34 @@ namespace Huntwords.Common.Repositories
         {
             var json = List(name).Pop();
             var rc = Json2PuzzleBoardTransformer.Transform(json);
+            PublishPopped(rc.Puzzle.Name);
             return rc;
         }
-        
+
         public void Push(PuzzleBoard puzzleBoard)
         {
             var json = PuzzleBoard2JsonTransformer.Transform(puzzleBoard);
             List(puzzleBoard.Puzzle.Name).Push(json);
+        }
+
+        public void PublishPopped(string puzzleName)
+        {
+            RedisClient.PublishMessage(PuzzleBoardPoppedChannel, puzzleName);
+        }
+
+        public void SubscribePopped(Action<string> puzzlePoppedHandler)
+        {
+            IRedisSubscription subscription = null;
+
+            using (subscription = RedisClient.CreateSubscription())
+            {
+                subscription.OnMessage += (channel, puzzleName) =>
+                {
+                    puzzlePoppedHandler(puzzleName);
+                };
+            }
+
+            subscription.SubscribeToChannels(new string[] { PuzzleBoardPoppedChannel });
         }
     }
 }
