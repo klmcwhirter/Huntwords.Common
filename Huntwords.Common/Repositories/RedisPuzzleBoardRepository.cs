@@ -17,6 +17,8 @@ namespace Huntwords.Common.Repositories
         protected ITransformer<string, PuzzleBoard> Json2PuzzleBoardTransformer { get; }
         protected ITransformer<PuzzleBoard, string> PuzzleBoard2JsonTransformer { get; }
 
+        protected IRedisSubscription Subscription { get; set; } = null;
+
         public RedisPuzzleBoardRepository(
             IRedisClient redisClient,
             ITransformer<string, PuzzleBoard> json2PuzzleBoardTransformer,
@@ -64,17 +66,17 @@ namespace Huntwords.Common.Repositories
 
         public void SubscribePopped(Action<string> puzzlePoppedHandler)
         {
-            IRedisSubscription subscription = null;
-
-            using (subscription = RedisClient.CreateSubscription())
+            using (Subscription = RedisClient.CreateSubscription())
             {
-                subscription.OnMessage += (channel, puzzleName) =>
+                Subscription.OnMessage += (channel, puzzleName) =>
                 {
+                    Subscription.UnSubscribeFromAllChannels();
+                    Subscription = null;
                     puzzlePoppedHandler(puzzleName);
                 };
             }
 
-            subscription.SubscribeToChannels(new string[] { PuzzleBoardPoppedChannel });
+            Subscription.SubscribeToChannels(new string[] { PuzzleBoardPoppedChannel });
         }
     }
 }
