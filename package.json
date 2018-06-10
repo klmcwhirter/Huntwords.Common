@@ -1,0 +1,11 @@
+{
+  "name": "Huntwords.Common",
+  "version": "2.0.3",
+  "license": "MIT",
+  "scripts": {
+    "clean": "find . -type d \\( -name bin -o -name obj \\) -exec rm -fr {} \\;",
+    "build": "dotnet build",
+    "test": "dotnet test Huntwords.Common.Tests/Huntwords.Common.Tests.csproj",
+    "nuget-push": "nuget-push $(jq -cr '.version' package.json)"
+  }
+}
