@@ -12,13 +12,13 @@ namespace Huntwords.Common.Repositories
         protected string PuzzleBoardListName = "urn:puzzleboards";
 
         protected IRedisClient RedisClient { get; }
-        protected JsonFromStringTransformer<PuzzleBoard> Json2PuzzleBoardTransformer { get; }
-        protected JsonToStringTransformer<PuzzleBoard> PuzzleBoard2JsonTransformer { get; }
+        protected ITransformer<string, PuzzleBoard> Json2PuzzleBoardTransformer { get; }
+        protected ITransformer<PuzzleBoard, string> PuzzleBoard2JsonTransformer { get; }
 
         public RedisPuzzleBoardRepository(
             IRedisClient redisClient,
-            JsonFromStringTransformer<PuzzleBoard> json2PuzzleBoardTransformer,
-            JsonToStringTransformer<PuzzleBoard> puzzleBoard2JsonTransformer
+            ITransformer<string, PuzzleBoard> json2PuzzleBoardTransformer,
+            ITransformer<PuzzleBoard, string> puzzleBoard2JsonTransformer
             )
         {
             RedisClient = redisClient;

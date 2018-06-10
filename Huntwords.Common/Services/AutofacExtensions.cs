@@ -1,4 +1,5 @@
 using Autofac;
+using Huntwords.Common.Models;
 
 namespace Huntwords.Common.Services
 {
@@ -15,6 +16,9 @@ namespace Huntwords.Common.Services
         public static ContainerBuilder RegisterCommonServices(this ContainerBuilder builder)
         {
             builder.RegisterType<CharacterGenerator>().As<ICharacterGenerator>();
+
+            builder.RegisterType<JsonFromStringTransformer<PuzzleBoard>>().As<ITransformer<string, PuzzleBoard>>();
+            builder.RegisterType<JsonToStringTransformer<PuzzleBoard>>().As<ITransformer<PuzzleBoard, string>>();
 
             return builder;
         }
