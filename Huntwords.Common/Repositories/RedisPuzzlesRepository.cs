@@ -1,5 +1,6 @@
 #pragma warning disable CS1572, CS1573, CS1591
 using System.Collections.Generic;
+using System.Linq;
 using Huntwords.Common.Models;
 using ServiceStack.Redis;
 
@@ -16,9 +17,10 @@ namespace Huntwords.Common.Repositories
 
         public IRedisClient RedisClient { get; }
 
+        protected string GetKey(string name) => PuzzlePrefix + name;
         public Puzzle Add(Puzzle puzzle)
         {
-            var key = PuzzlePrefix + puzzle.Name;
+            var key = GetKey(puzzle.Name);
             RedisClient.Set(key, puzzle);
             var rc = Get(puzzle.Name);
             return rc;
@@ -28,13 +30,14 @@ namespace Huntwords.Common.Repositories
         {
             var puzzle = Get(name);
             puzzle.PuzzleWords.Add(word);
+            puzzle.PuzzleWords.Sort((a,b) => a.CompareTo(b));
             var rc = Update(puzzle.Name, puzzle);
             return rc;
         }
 
         public void Delete(string name)
         {
-            var key = PuzzlePrefix + name;
+            var key = GetKey(name);
             RedisClient.Remove(key);
         }
 
@@ -48,7 +51,7 @@ namespace Huntwords.Common.Repositories
 
         public Puzzle Get(string name)
         {
-            var key = PuzzlePrefix + name;
+            var key = GetKey(name);
             var rc = RedisClient.Get<Puzzle>(key);
             return rc;
         }

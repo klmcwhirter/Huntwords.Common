@@ -9,10 +9,10 @@ namespace Huntwords.Common.Models
 
         public string Description { get; set; }
 
-        public ICollection<string> Topics { get; set; }
+        public List<string> Topics { get; set; }
 
-        public ICollection<string> Tags { get; set; }
+        public List<string> Tags { get; set; }
 
-        public ICollection<string> PuzzleWords { get; set; }
+        public List<string> PuzzleWords { get; set; }
     }
 }
