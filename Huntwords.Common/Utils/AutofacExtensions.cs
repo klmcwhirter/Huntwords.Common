@@ -21,6 +21,7 @@ namespace Huntwords.Common.Utils
         public static ContainerBuilder RegisterCommonRedis(this ContainerBuilder builder, IConfigurationRoot configRoot)
         {
             var redisUrl = GetRedisUrl(configRoot);
+
             builder.Register<IRedisClientsManager>(c => new PooledRedisClientManager(redisUrl)).As<IRedisClientsManager>();
             builder.Register<IRedisClient>(c =>
             {
@@ -28,18 +29,6 @@ namespace Huntwords.Common.Utils
                 var client = mgr.GetClient();
                 return client;
             }).As<IRedisClient>();
-            builder.Register<IRedisTypedClient<Puzzle>>(c =>
-            {
-                var client = c.Resolve<IRedisClient>();
-                var typedClient = client.As<Puzzle>();
-                return typedClient;
-            }).As<IRedisTypedClient<Puzzle>>();
-            builder.Register<IRedisTypedClient<PuzzleBoard>>(c =>
-            {
-                var client = c.Resolve<IRedisClient>();
-                var typedClient = client.As<PuzzleBoard>();
-                return typedClient;
-            }).As<IRedisTypedClient<PuzzleBoard>>();
 
             return builder;
         }

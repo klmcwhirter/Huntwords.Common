@@ -1,22 +1,26 @@
 #pragma warning disable CS1572, CS1573, CS1591
 using System.Collections.Generic;
 using Huntwords.Common.Models;
-using ServiceStack.Redis.Generic;
+using ServiceStack.Redis;
 
 namespace Huntwords.Common.Repositories
 {
     public class RedisPuzzlesRepository : IPuzzlesRepository
     {
-        protected IRedisTypedClient<Puzzle> RedisTypedClient { get; }
+        protected string PuzzlePrefix = "urn:puzzle:";
 
-        public RedisPuzzlesRepository(IRedisTypedClient<Puzzle> redisTypedClient)
+        public RedisPuzzlesRepository(IRedisClient redisClient)
         {
-            RedisTypedClient = redisTypedClient;
+            RedisClient = redisClient;
         }
+
+        public IRedisClient RedisClient { get; }
 
         public Puzzle Add(Puzzle puzzle)
         {
-            var rc = RedisTypedClient.Store(puzzle);
+            var key = PuzzlePrefix + puzzle.Name;
+            RedisClient.Set(key, puzzle);
+            var rc = Get(puzzle.Name);
             return rc;
         }
 
@@ -30,7 +34,8 @@ namespace Huntwords.Common.Repositories
 
         public void Delete(string name)
         {
-            RedisTypedClient.DeleteById(name);
+            var key = PuzzlePrefix + name;
+            RedisClient.Remove(key);
         }
 
         public Puzzle DeleteWord(string name, string word)
@@ -43,19 +48,21 @@ namespace Huntwords.Common.Repositories
 
         public Puzzle Get(string name)
         {
-            var rc = RedisTypedClient.GetById(name);
+            var key = PuzzlePrefix + name;
+            var rc = RedisClient.Get<Puzzle>(key);
             return rc;
         }
 
         public ICollection<Puzzle> GetAll()
         {
-            var rc = RedisTypedClient.GetAll();
-            return rc;
+            var keys = RedisClient.SearchKeys(PuzzlePrefix + "*");
+            var rc = RedisClient.GetAll<Puzzle>(keys);
+            return rc.Values;
         }
 
         public Puzzle Update(string name, Puzzle puzzle)
         {
-            var rc = RedisTypedClient.Store(puzzle);
+            var rc = Add(puzzle);
             return rc;
         }
     }
