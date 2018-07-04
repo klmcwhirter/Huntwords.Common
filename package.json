@@ -1,6 +1,6 @@
 {
   "name": "Huntwords.Common",
-  "version": "2.0.9",
+  "version": "2.0.10",
   "license": "MIT",
   "scripts": {
     "clean": "find . -type d \\( -name bin -o -name obj \\) -exec rm -fr {} \\;",
