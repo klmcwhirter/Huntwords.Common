@@ -30,7 +30,7 @@ namespace Huntwords.Common.Repositories
         {
             var puzzle = Get(name);
             puzzle.PuzzleWords.Add(word);
-            puzzle.PuzzleWords.Sort((a,b) => a.CompareTo(b));
+            puzzle.PuzzleWords.Sort();
             var rc = Update(puzzle.Name, puzzle);
             return rc;
         }
