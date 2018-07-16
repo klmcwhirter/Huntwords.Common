@@ -47,7 +47,7 @@ namespace Huntwords.Common.Repositories
 
         public PuzzleBoard Pop(string name)
         {
-            var json = List(name).Pop();
+            var json = List(name).Pop(); // FIFO queue semantics
             var rc = Json2PuzzleBoardTransformer.Transform(json);
             PublishPopped(rc.Puzzle.Name);
             return rc;
@@ -56,7 +56,7 @@ namespace Huntwords.Common.Repositories
         public void Push(PuzzleBoard puzzleBoard)
         {
             var json = PuzzleBoard2JsonTransformer.Transform(puzzleBoard);
-            List(puzzleBoard.Puzzle.Name).Push(json);
+            List(puzzleBoard.Puzzle.Name).Enqueue(json); // FIFO queue semantics
         }
 
         public void PublishPopped(string puzzleName)
