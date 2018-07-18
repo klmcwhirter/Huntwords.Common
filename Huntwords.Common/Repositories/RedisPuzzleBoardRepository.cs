@@ -11,21 +11,21 @@ namespace Huntwords.Common.Repositories
     public class RedisPuzzleBoardRepository : IPuzzleBoardRepository
     {
         protected string PuzzleBoardListName = "urn:puzzleboards";
-        protected string PuzzleBoardPoppedChannel = "urn:puzzleboard:popped";
 
         protected IRedisClient RedisClient { get; }
+        protected IRedisPuzzleBoardPubSubService RedisPuzzleBoardPubSubService { get; }
         protected ITransformer<string, PuzzleBoard> Json2PuzzleBoardTransformer { get; }
         protected ITransformer<PuzzleBoard, string> PuzzleBoard2JsonTransformer { get; }
 
-        protected IRedisSubscription Subscription { get; set; } = null;
-
         public RedisPuzzleBoardRepository(
             IRedisClient redisClient,
+            IRedisPuzzleBoardPubSubService redisPuzzleBoardPubSubService,
             ITransformer<string, PuzzleBoard> json2PuzzleBoardTransformer,
             ITransformer<PuzzleBoard, string> puzzleBoard2JsonTransformer
             )
         {
             RedisClient = redisClient;
+            RedisPuzzleBoardPubSubService = redisPuzzleBoardPubSubService;
             Json2PuzzleBoardTransformer = json2PuzzleBoardTransformer;
             PuzzleBoard2JsonTransformer = puzzleBoard2JsonTransformer;
         }
@@ -49,7 +49,7 @@ namespace Huntwords.Common.Repositories
         {
             var json = List(name).Pop(); // FIFO queue semantics
             var rc = Json2PuzzleBoardTransformer.Transform(json);
-            PublishPopped(rc.Puzzle.Name);
+            RedisPuzzleBoardPubSubService.PublishPopped(rc.Puzzle.Name);
             return rc;
         }
 
@@ -57,26 +57,6 @@ namespace Huntwords.Common.Repositories
         {
             var json = PuzzleBoard2JsonTransformer.Transform(puzzleBoard);
             List(puzzleBoard.Puzzle.Name).Enqueue(json); // FIFO queue semantics
-        }
-
-        public void PublishPopped(string puzzleName)
-        {
-            RedisClient.PublishMessage(PuzzleBoardPoppedChannel, puzzleName);
-        }
-
-        public void SubscribePopped(Action<string> puzzlePoppedHandler)
-        {
-            using (Subscription = RedisClient.CreateSubscription())
-            {
-                Subscription.OnMessage += (channel, puzzleName) =>
-                {
-                    Subscription.UnSubscribeFromAllChannels();
-                    Subscription = null;
-                    puzzlePoppedHandler(puzzleName);
-                };
-            }
-
-            Subscription.SubscribeToChannels(new string[] { PuzzleBoardPoppedChannel });
         }
     }
 }

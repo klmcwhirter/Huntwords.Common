@@ -17,6 +17,8 @@ namespace Huntwords.Common.Services
         {
             builder.RegisterType<CharacterGenerator>().As<ICharacterGenerator>();
 
+            builder.RegisterType<RedisPuzzleBoardPubSubService>().As<IRedisPuzzleBoardPubSubService>();
+
             builder.RegisterType<JsonFromStringTransformer<PuzzleBoard>>().As<ITransformer<string, PuzzleBoard>>();
             builder.RegisterType<JsonToStringTransformer<PuzzleBoard>>().As<ITransformer<PuzzleBoard, string>>();
 
